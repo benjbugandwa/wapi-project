@@ -1,0 +1,248 @@
+# CONTEXTE
+
+Tu participes au développement d'un SaaS multi-tenant de gestion de cabinets d'avocats.
+
+Avant toute action, lis et respecte impérativement les documents suivants :
+
+- C:/xampp/wapi-project/docs/methodologie.md
+- C:/xampp/wapi-project/docs/Vision.md
+- C:/xampp/wapi-project/docs/Requirements.md
+- C:/xampp/wapi-project/docs/Architecture.md
+- C:/xampp/wapi-project/docs/DatabaseDesign.md
+- C:/xampp/wapi-project/docs/API.md
+- C:/xampp/wapi-project/docs/UI.md
+- C:/xampp/wapi-project/docs/BusinessRules.md
+- C:/xampp/wapi-project/docs/CodingStandards.md
+- C:/xampp/wapi-project/docs/AGENTS.md
+
+Ces documents constituent la source unique de vérité.
+
+Ne fais jamais d'hypothèses lorsqu'une règle métier est documentée.
+
+En cas d'incohérence entre deux documents, arrête-toi et explique le problème avant toute implémentation.
+
+---
+
+# MODULE À DÉVELOPPER
+
+Gestion des clients.
+
+Objectifs :
+
+Développer le CRUD complet de gestion des dossiers
+
+- création d'un nouveau dossier
+- visualisation des dossiers, avec options de filtres et pagination
+- lier un dossier au client correspondant
+- affectation des collaborateurs à un dossier
+- Enregistrement/édition des informations sur la parties adverses
+- Gérer le statut/état d'avancement des dossiers
+- Ajout des documents/pièces jointes à un dossier (passeport, etc.)
+- multi-tenant
+
+---
+
+# STACK
+
+Laravel 12
+
+Livewire 4
+
+PHP 8.4
+
+PostgreSQL
+
+TailwindCSS
+
+AlpineJS
+
+Spatie Permission
+
+Laravel Notifications
+
+Pest
+
+---
+
+# CONTRAINTES
+
+Le développement doit respecter strictement :
+
+- Requirements.md
+- DatabaseDesign.md
+- API.md
+- UI.md
+- BusinessRules.md
+- CodingStandards.md
+- AcceptanceCriteria.md
+
+Respecter :
+
+- SOLID
+- DRY
+- KISS
+- Clean Architecture
+- PSR-12
+
+Ne jamais casser une fonctionnalité existante.
+
+Ne jamais dupliquer du code.
+
+Toujours privilégier la solution la plus maintenable.
+
+---
+
+# LIVRABLES OBLIGATOIRES
+
+Le module doit inclure si nécessaire :
+
+- migrations
+
+- modèles
+
+- relations
+
+- enums
+
+- factories
+
+- seeders
+
+- policies
+
+- gates
+
+- middleware
+
+- form requests
+
+- services
+
+- repositories (si nécessaire)
+
+- DTO (si nécessaire)
+
+- notifications
+
+- mail
+
+- jobs
+
+- events
+
+- listeners
+
+- composants Livewire
+
+- vues Blade
+
+- routes
+
+- configuration
+
+- tests Unit
+
+- tests Feature
+
+- documentation
+
+---
+
+# MÉTHODOLOGIE
+
+Ne commence jamais directement à coder.
+
+Travaille obligatoirement selon les étapes suivantes.
+
+## Étape 1
+
+Analyse tous les documents.
+
+Identifie les règles métier.
+
+Identifie les dépendances.
+
+Identifie les risques.
+
+Identifie les incohérences éventuelles.
+
+Ne code rien.
+
+---
+
+## Étape 2
+
+Présente un plan d'architecture détaillé.
+
+Explique :
+
+- les modules concernés
+- les modèles
+- les migrations
+- les relations
+- les services
+- les composants Livewire
+- les routes
+- les notifications
+- les tests
+
+Explique également pourquoi ces choix sont les meilleurs.
+
+Ne code toujours rien.
+
+---
+
+## Étape 3
+
+Découpe le travail en petites tâches indépendantes.
+
+Chaque tâche doit pouvoir être développée en moins d'une heure.
+
+Présente un backlog sous la forme :
+
+Task 1
+
+Objectif
+
+Fichiers concernés
+
+Dépendances
+
+Critères d'acceptation
+
+---
+
+Task 2
+
+...
+
+Attends ensuite ma validation.
+
+---
+
+## Étape 4
+
+Une fois le backlog validé, développe toutes les tâches.
+
+
+
+---
+
+## Étape 5
+
+À la fin du développement de toutes les tâches :
+
+- exécute les tests
+- vérifie la sécurité
+- vérifie les performances
+- mets à jour la documentation
+- résume les modifications
+- propose la tâche suivante
+
+---
+
+# IMPORTANT
+
+Si tu estimes qu'une meilleure architecture est possible que celle décrite dans les documents, explique-la avant de coder.
+
+N'effectue aucune modification structurelle sans validation.
