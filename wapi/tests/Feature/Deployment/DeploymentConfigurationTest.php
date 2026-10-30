@@ -58,3 +58,16 @@ test('document storage disk is configurable for persistent railway volume', func
 
     Storage::disk('deployment-documents')->assertExists($document->chemin_acces);
 });
+
+test('security headers include livewire compatible content security policy', function () {
+    $response = $this->get('/login');
+
+    $response->assertOk()
+        ->assertHeader('X-Frame-Options', 'DENY')
+        ->assertHeader('X-Content-Type-Options', 'nosniff');
+
+    $csp = $response->headers->get('Content-Security-Policy');
+    expect($csp)->toBeString()
+        ->and($csp)->toContain("'unsafe-eval'")
+        ->and($csp)->toContain('https://fonts.bunny.net');
+});
