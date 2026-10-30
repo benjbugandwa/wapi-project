@@ -1,0 +1,36 @@
+﻿# nixpacks.toml - Configuration Railway / Nixpacks optimisée pour Wapi (Laravel 12, Livewire, Vite, PostgreSQL)
+[phases.setup]
+nixPkgs = [
+    "php82",
+    "php82Extensions.pdo",
+    "php82Extensions.pdo_pgsql",
+    "php82Extensions.pgsql",
+    "php82Extensions.mbstring",
+    "php82Extensions.openssl",
+    "php82Extensions.bcmath",
+    "php82Extensions.curl",
+    "php82Extensions.gd",
+    "php82Extensions.zip",
+    "php82Extensions.dom",
+    "php82Extensions.xml",
+    "php82Extensions.fileinfo",
+    "php82Extensions.intl",
+    "php82Extensions.tokenizer",
+    "composer",
+    "nodejs_20"
+]
+
+[phases.install]
+cmds = [
+    "composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction",
+    "npm ci"
+]
+
+[phases.build]
+cmds = [
+    "npm run build",
+    "php artisan package:discover --ansi"
+]
+
+[start]
+cmd = "bash scripts/railway-start.sh"

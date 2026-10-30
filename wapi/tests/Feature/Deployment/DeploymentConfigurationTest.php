@@ -16,12 +16,15 @@ test('railway deployment files are present and reference production commands', f
     $root = base_path();
 
     expect(file_exists($root.'/railway.json'))->toBeTrue()
+        ->and(file_exists($root.'/nixpacks.toml'))->toBeTrue()
         ->and(file_exists($root.'/Procfile'))->toBeTrue()
         ->and(file_exists($root.'/scripts/railway-build.sh'))->toBeTrue()
         ->and(file_exists($root.'/scripts/railway-start.sh'))->toBeTrue()
         ->and(file_get_contents($root.'/railway.json'))->toContain('/up')
         ->and(file_get_contents($root.'/Procfile'))->toContain('queue:work')
-        ->and(file_get_contents($root.'/Procfile'))->toContain('schedule:work');
+        ->and(file_get_contents($root.'/Procfile'))->toContain('schedule:work')
+        ->and(file_get_contents($root.'/nixpacks.toml'))->toContain('pdo_pgsql')
+        ->and(file_get_contents($root.'/nixpacks.toml'))->toContain('nodejs_20');
 });
 
 test('production env example documents required deployment variables', function () {
@@ -70,4 +73,13 @@ test('security headers include livewire compatible content security policy', fun
     expect($csp)->toBeString()
         ->and($csp)->toContain("'unsafe-eval'")
         ->and($csp)->toContain('https://fonts.bunny.net');
+});
+
+test('database pgsql configuration supports railway database url and pg environment variables', function () {
+    putenv('DATABASE_URL=postgres://user:pass@ep-test.railway.internal:5432/railway');
+
+    $config = require base_path('config/database.php');
+    expect($config['connections']['pgsql']['url'])->toBe('postgres://user:pass@ep-test.railway.internal:5432/railway');
+
+    putenv('DATABASE_URL');
 });
