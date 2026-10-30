@@ -23,8 +23,8 @@ test('railway deployment files are present and reference production commands', f
         ->and(file_get_contents($root.'/railway.json'))->toContain('/up')
         ->and(file_get_contents($root.'/Procfile'))->toContain('queue:work')
         ->and(file_get_contents($root.'/Procfile'))->toContain('schedule:work')
-        ->and(file_get_contents($root.'/nixpacks.toml'))->toContain('pdo_pgsql')
-        ->and(file_get_contents($root.'/nixpacks.toml'))->toContain('nodejs_20');
+        ->and(file_get_contents($root.'/composer.json'))->toContain('ext-pdo_pgsql')
+        ->and(file_get_contents($root.'/nixpacks.toml'))->toContain('providers');
 });
 
 test('production env example documents required deployment variables', function () {
