@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\NotificationChannelEnum;
+use App\Models\Concerns\BelongsToCabinet;
 use App\Models\Concerns\UsesUuid;
 use Database\Factories\RappelFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Rappel extends Model
 {
     /** @use HasFactory<RappelFactory> */
-    use HasFactory, UsesUuid;
+    use BelongsToCabinet, HasFactory, UsesUuid;
 
     /**
      * @var list<string>
@@ -41,14 +42,6 @@ class Rappel extends Model
             'est_envoye' => 'boolean',
             'sent_at' => 'datetime',
         ];
-    }
-
-    /**
-     * @return BelongsTo<Cabinet, Rappel>
-     */
-    public function cabinet(): BelongsTo
-    {
-        return $this->belongsTo(Cabinet::class);
     }
 
     /**

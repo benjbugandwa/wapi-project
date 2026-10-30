@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\DomaineDroitEnum;
 use App\Enums\DossierStatusEnum;
 use App\Enums\TypeFacturationEnum;
+use App\Models\Concerns\BelongsToCabinet;
 use App\Models\Concerns\UsesUuid;
 use Carbon\CarbonInterface;
 use Database\Factories\DossierFactory;
@@ -20,7 +21,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Dossier extends Model
 {
     /** @use HasFactory<DossierFactory> */
-    use HasFactory, SoftDeletes, UsesUuid;
+    use BelongsToCabinet, HasFactory, SoftDeletes, UsesUuid;
 
     /**
      * @var list<string>
@@ -53,14 +54,6 @@ class Dossier extends Model
             'date_ouverture' => 'date',
             'date_cloture' => 'date',
         ];
-    }
-
-    /**
-     * @return BelongsTo<Cabinet, Dossier>
-     */
-    public function cabinet(): BelongsTo
-    {
-        return $this->belongsTo(Cabinet::class);
     }
 
     /**

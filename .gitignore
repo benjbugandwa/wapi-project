@@ -1,0 +1,43 @@
+# Global / IDE
+.agents/
+.vscode/
+.idea/
+.fleet/
+.nova/
+.zed/
+
+# Dependencies & Build
+wapi/vendor/
+wapi/node_modules/
+wapi/public/build/
+wapi/public/hot/
+wapi/public/storage
+wapi/package-lock.json
+
+# Environment & Keys
+wapi/.env
+wapi/.env.backup
+wapi/.env.production
+wapi/storage/*.key
+wapi/auth.json
+
+# Logs & Cache
+wapi/storage/logs/*.log
+wapi/storage/framework/cache/data/*
+!wapi/storage/framework/cache/data/.gitignore
+wapi/storage/framework/sessions/*
+!wapi/storage/framework/sessions/.gitignore
+wapi/storage/framework/views/*
+!wapi/storage/framework/views/.gitignore
+wapi/storage/app/public/*
+!wapi/storage/app/public/.gitignore
+wapi/.phpunit.result.cache
+wapi/.phpunit.cache
+
+# Mailpit binaries & logs
+wapi/tools/mailpit/*.exe
+wapi/tools/mailpit/*.zip
+wapi/tools/mailpit/*.db
+wapi/tools/mailpit/*.db-shm
+wapi/tools/mailpit/*.db-wal
+wapi/tools/mailpit/*.log

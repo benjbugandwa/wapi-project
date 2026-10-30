@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToCabinet;
 use App\Models\Concerns\UsesUuid;
 use Database\Factories\CabinetInvitationFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,7 +15,7 @@ use Illuminate\Notifications\Notifiable;
 class CabinetInvitation extends Model
 {
     /** @use HasFactory<CabinetInvitationFactory> */
-    use HasFactory, Notifiable, UsesUuid;
+    use BelongsToCabinet, HasFactory, Notifiable, UsesUuid;
 
     /**
      * @var list<string>
@@ -38,14 +39,6 @@ class CabinetInvitation extends Model
             'accepted_at' => 'datetime',
             'expires_at' => 'datetime',
         ];
-    }
-
-    /**
-     * @return BelongsTo<Cabinet, CabinetInvitation>
-     */
-    public function cabinet(): BelongsTo
-    {
-        return $this->belongsTo(Cabinet::class);
     }
 
     /**

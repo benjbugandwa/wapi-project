@@ -67,7 +67,8 @@ new #[Layout('layouts.app')] class extends Component
             'documents' => $this->client->documents()
                 ->with(['uploadedBy'])
                 ->latest()
-                ->get(),
+                ->get()
+                ->filter(fn (Document $doc): bool => auth()->user()?->can('view', $doc) ?? false),
         ];
     }
 }; ?>

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\ClientTypeEnum;
+use App\Models\Concerns\BelongsToCabinet;
 use App\Models\Concerns\UsesUuid;
 use Database\Factories\PartieAdverseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class PartieAdverse extends Model
 {
     /** @use HasFactory<PartieAdverseFactory> */
-    use HasFactory, SoftDeletes, UsesUuid;
+    use BelongsToCabinet, HasFactory, SoftDeletes, UsesUuid;
 
     protected $table = 'parties_adverses';
 
@@ -44,14 +45,6 @@ class PartieAdverse extends Model
         return [
             'type_partie' => ClientTypeEnum::class,
         ];
-    }
-
-    /**
-     * @return BelongsTo<Cabinet, PartieAdverse>
-     */
-    public function cabinet(): BelongsTo
-    {
-        return $this->belongsTo(Cabinet::class);
     }
 
     /**

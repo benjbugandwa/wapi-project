@@ -5,13 +5,14 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\NotificationChannelEnum;
+use App\Models\Concerns\BelongsToCabinet;
 use App\Models\Concerns\UsesUuid;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class NotificationPreference extends Model
 {
-    use UsesUuid;
+    use BelongsToCabinet, UsesUuid;
 
     /**
      * @var list<string>
@@ -33,14 +34,6 @@ class NotificationPreference extends Model
             'canal_notification' => NotificationChannelEnum::class,
             'is_enabled' => 'boolean',
         ];
-    }
-
-    /**
-     * @return BelongsTo<Cabinet, NotificationPreference>
-     */
-    public function cabinet(): BelongsTo
-    {
-        return $this->belongsTo(Cabinet::class);
     }
 
     /**

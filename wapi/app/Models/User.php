@@ -201,4 +201,33 @@ class User extends Authenticatable implements MustVerifyEmail
 
         return $cabinetId !== null && $this->cabinet_id === $cabinetId;
     }
+
+    public function primaryRole(): RoleEnum
+    {
+        if ($this->hasRole(RoleEnum::SystemAdmin->value)) {
+            return RoleEnum::SystemAdmin;
+        }
+
+        if ($this->hasRole(RoleEnum::Admin->value)) {
+            return RoleEnum::Admin;
+        }
+
+        if ($this->hasRole(RoleEnum::Avocat->value)) {
+            return RoleEnum::Avocat;
+        }
+
+        if ($this->hasRole(RoleEnum::Comptable->value)) {
+            return RoleEnum::Comptable;
+        }
+
+        if ($this->hasRole(RoleEnum::Secretaire->value)) {
+            return RoleEnum::Secretaire;
+        }
+
+        if ($this->hasRole(RoleEnum::Stagiaire->value)) {
+            return RoleEnum::Stagiaire;
+        }
+
+        return RoleEnum::Avocat;
+    }
 }

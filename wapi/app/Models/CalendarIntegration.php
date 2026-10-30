@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\CalendarProviderEnum;
+use App\Models\Concerns\BelongsToCabinet;
 use App\Models\Concerns\UsesUuid;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CalendarIntegration extends Model
 {
-    use UsesUuid;
+    use BelongsToCabinet, UsesUuid;
 
     /**
      * @var list<string>
@@ -43,14 +44,6 @@ class CalendarIntegration extends Model
             'is_active' => 'boolean',
             'last_synced_at' => 'datetime',
         ];
-    }
-
-    /**
-     * @return BelongsTo<Cabinet, CalendarIntegration>
-     */
-    public function cabinet(): BelongsTo
-    {
-        return $this->belongsTo(Cabinet::class);
     }
 
     /**

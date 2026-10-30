@@ -10,6 +10,7 @@ use App\Models\NotificationWebhookEvent;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Twilio\Security\RequestValidator;
 
 class TwilioWebhookController extends Controller
 {
@@ -45,28 +46,50 @@ class TwilioWebhookController extends Controller
 
     private function signatureIsValid(Request $request): bool
     {
-        if (! config('services.twilio.validate_webhook_signature', false)) {
+        $shouldValidate = (bool) config('services.twilio.validate_webhook_signature', false);
+
+        if (! $shouldValidate) {
             return true;
         }
 
         $authToken = config('services.twilio.auth_token');
         $signature = $request->header('X-Twilio-Signature');
 
-        if (! is_string($authToken) || ! is_string($signature)) {
+        if (! is_string($authToken) || $authToken === '' || ! is_string($signature) || $signature === '') {
             return false;
         }
 
-        $data = $request->request->all();
-        ksort($data);
+        $url = $this->resolveTwilioWebhookUrl($request);
+        $validator = new RequestValidator($authToken);
 
-        $payload = $request->fullUrl();
+        /** @var array<string, mixed> $postData */
+        $postData = $request->post();
 
-        foreach ($data as $key => $value) {
-            $payload .= $key.$value;
+        return $validator->validate($signature, $url, $postData);
+    }
+
+    private function resolveTwilioWebhookUrl(Request $request): string
+    {
+        $url = $request->fullUrl();
+
+        // Gestion reverse proxy Railway : forcer https si X-Forwarded-Proto vaut https
+        $proto = $request->header('X-Forwarded-Proto');
+        if ($proto === 'https' && str_starts_with($url, 'http://')) {
+            $url = 'https://'.substr($url, 7);
         }
 
-        $expected = base64_encode(hash_hmac('sha1', $payload, $authToken, true));
+        // Si X-Forwarded-Host est renseigne par le proxy Railway, aligner l'hote de l'URL
+        $host = $request->header('X-Forwarded-Host');
+        if (is_string($host) && $host !== '') {
+            $parsed = parse_url($url);
+            if ($parsed !== false && isset($parsed['host']) && $parsed['host'] !== $host) {
+                $scheme = $parsed['scheme'] ?? ($proto ?: 'https');
+                $path = $parsed['path'] ?? '';
+                $query = isset($parsed['query']) ? '?'.$parsed['query'] : '';
+                $url = "{$scheme}://{$host}{$path}{$query}";
+            }
+        }
 
-        return hash_equals($expected, $signature);
+        return $url;
     }
 }

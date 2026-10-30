@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\MethodePaiementEnum;
+use App\Models\Concerns\BelongsToCabinet;
 use App\Models\Concerns\UsesUuid;
 use Database\Factories\PaiementFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Paiement extends Model
 {
     /** @use HasFactory<PaiementFactory> */
-    use HasFactory, SoftDeletes, UsesUuid;
+    use BelongsToCabinet, HasFactory, SoftDeletes, UsesUuid;
 
     /**
      * @var list<string>
@@ -40,11 +41,6 @@ class Paiement extends Model
             'date_paiement' => 'date',
             'methode_paiement' => MethodePaiementEnum::class,
         ];
-    }
-
-    public function cabinet(): BelongsTo
-    {
-        return $this->belongsTo(Cabinet::class);
     }
 
     public function facture(): BelongsTo

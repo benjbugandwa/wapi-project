@@ -128,3 +128,12 @@ Etat implementation module Facturation :
 - CI/CD.
 - Tests browser.
 - Couverture > 80%.
+
+Etat preparation deploiement Railway :
+
+- Configuration Railway ajoutee avec build, start command et health check `/up`.
+- Services web, worker queue et scheduler documentes via `Procfile`.
+- Stockage documentaire rendu configurable pour Persistent Volume Railway.
+- Variables d'environnement production documentees dans `.env.example`.
+- Headers de securite, trusted proxies et trusted hosts prepares.
+- Documentation deploiement, sauvegarde, restauration, rollback et incident ajoutee.

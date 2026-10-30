@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\ClientTypeEnum;
+use App\Models\Concerns\BelongsToCabinet;
 use App\Models\Concerns\UsesUuid;
 use Database\Factories\ClientFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,7 +17,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Client extends Model
 {
     /** @use HasFactory<ClientFactory> */
-    use HasFactory, SoftDeletes, UsesUuid;
+    use BelongsToCabinet, HasFactory, SoftDeletes, UsesUuid;
 
     /**
      * @var list<string>
@@ -45,14 +46,6 @@ class Client extends Model
         return [
             'type_client' => ClientTypeEnum::class,
         ];
-    }
-
-    /**
-     * @return BelongsTo<Cabinet, Client>
-     */
-    public function cabinet(): BelongsTo
-    {
-        return $this->belongsTo(Cabinet::class);
     }
 
     /**

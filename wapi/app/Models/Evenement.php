@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\EvenementStatusEnum;
 use App\Enums\EvenementTypeEnum;
+use App\Models\Concerns\BelongsToCabinet;
 use App\Models\Concerns\UsesUuid;
 use Database\Factories\EvenementFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,7 +19,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Evenement extends Model
 {
     /** @use HasFactory<EvenementFactory> */
-    use HasFactory, SoftDeletes, UsesUuid;
+    use BelongsToCabinet, HasFactory, SoftDeletes, UsesUuid;
 
     /**
      * @var list<string>
@@ -51,14 +52,6 @@ class Evenement extends Model
             'date_fin' => 'datetime',
             'cancelled_at' => 'datetime',
         ];
-    }
-
-    /**
-     * @return BelongsTo<Cabinet, Evenement>
-     */
-    public function cabinet(): BelongsTo
-    {
-        return $this->belongsTo(Cabinet::class);
     }
 
     /**

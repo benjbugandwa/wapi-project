@@ -40,7 +40,22 @@ return [
         'auth_token' => env('TWILIO_AUTH_TOKEN'),
         'sms_from' => env('TWILIO_SMS_FROM'),
         'whatsapp_from' => env('TWILIO_WHATSAPP_FROM'),
-        'validate_webhook_signature' => env('TWILIO_VALIDATE_WEBHOOK_SIGNATURE', false),
+        'validate_webhook_signature' => (bool) env('TWILIO_VALIDATE_WEBHOOK_SIGNATURE', env('APP_ENV') === 'production'),
+    ],
+
+    'google_calendar' => [
+        'client_id' => env('GOOGLE_CALENDAR_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CALENDAR_CLIENT_SECRET'),
+        'redirect_uri' => env('GOOGLE_CALENDAR_REDIRECT_URI'),
+        'scopes' => array_filter(explode(' ', (string) env('GOOGLE_CALENDAR_SCOPES', ''))),
+    ],
+
+    'microsoft_graph' => [
+        'client_id' => env('MICROSOFT_GRAPH_CLIENT_ID'),
+        'client_secret' => env('MICROSOFT_GRAPH_CLIENT_SECRET'),
+        'tenant_id' => env('MICROSOFT_GRAPH_TENANT_ID', 'common'),
+        'redirect_uri' => env('MICROSOFT_GRAPH_REDIRECT_URI'),
+        'scopes' => array_filter(explode(' ', (string) env('MICROSOFT_GRAPH_SCOPES', ''))),
     ],
 
 ];

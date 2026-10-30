@@ -35,7 +35,7 @@ class DocumentService
             $path = $file->storeAs(
                 $this->storageDirectory($owner),
                 $systemName,
-                'local',
+                $this->disk(),
             );
 
             $document = Document::query()->create([
@@ -81,7 +81,7 @@ class DocumentService
             ],
         );
 
-        return Storage::disk('local')->download(
+        return Storage::disk($this->disk())->download(
             $document->chemin_acces,
             $document->nom_original,
         );
@@ -112,6 +112,11 @@ class DocumentService
         }
 
         return 'dossier-documents/'.$owner->cabinet_id.'/'.$owner->id;
+    }
+
+    private function disk(): string
+    {
+        return (string) config('wapi.documents.disk', 'local');
     }
 
     private function mimeType(UploadedFile $file): string

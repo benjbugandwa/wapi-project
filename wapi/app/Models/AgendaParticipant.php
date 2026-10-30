@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToCabinet;
 use App\Models\Concerns\UsesUuid;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class AgendaParticipant extends Model
 {
-    use UsesUuid;
+    use BelongsToCabinet, UsesUuid;
 
     protected $table = 'agenda_participants';
 
@@ -22,14 +23,6 @@ class AgendaParticipant extends Model
         'evenement_id',
         'user_id',
     ];
-
-    /**
-     * @return BelongsTo<Cabinet, AgendaParticipant>
-     */
-    public function cabinet(): BelongsTo
-    {
-        return $this->belongsTo(Cabinet::class);
-    }
 
     /**
      * @return BelongsTo<Evenement, AgendaParticipant>

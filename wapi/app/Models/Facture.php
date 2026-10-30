@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\FactureStatusEnum;
 use App\Enums\FactureTypeEnum;
+use App\Models\Concerns\BelongsToCabinet;
 use App\Models\Concerns\UsesUuid;
 use Database\Factories\FactureFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,7 +18,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Facture extends Model
 {
     /** @use HasFactory<FactureFactory> */
-    use HasFactory, SoftDeletes, UsesUuid;
+    use BelongsToCabinet, HasFactory, SoftDeletes, UsesUuid;
 
     /**
      * @var list<string>
@@ -55,11 +56,6 @@ class Facture extends Model
             'montant_tva' => 'decimal:2',
             'montant_ttc' => 'decimal:2',
         ];
-    }
-
-    public function cabinet(): BelongsTo
-    {
-        return $this->belongsTo(Cabinet::class);
     }
 
     public function client(): BelongsTo

@@ -6,13 +6,14 @@ namespace App\Models;
 
 use App\Enums\CalendarProviderEnum;
 use App\Enums\CalendarSyncStatusEnum;
+use App\Models\Concerns\BelongsToCabinet;
 use App\Models\Concerns\UsesUuid;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CalendarSyncLog extends Model
 {
-    use UsesUuid;
+    use BelongsToCabinet, UsesUuid;
 
     /**
      * @var list<string>
@@ -38,14 +39,6 @@ class CalendarSyncLog extends Model
             'sync_status' => CalendarSyncStatusEnum::class,
             'payload' => 'array',
         ];
-    }
-
-    /**
-     * @return BelongsTo<Cabinet, CalendarSyncLog>
-     */
-    public function cabinet(): BelongsTo
-    {
-        return $this->belongsTo(Cabinet::class);
     }
 
     /**
