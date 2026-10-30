@@ -10,7 +10,7 @@
 wapi/vendor/
 wapi/node_modules/
 wapi/public/build/
-wapi/public/hot/
+wapi/public/hot
 wapi/public/storage
 wapi/package-lock.json
 
