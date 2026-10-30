@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Enums\CabinetStatus;
 use App\Enums\RoleEnum;
 use App\Models\Cabinet;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -16,25 +18,46 @@ class DatabaseSeeder extends Seeder
         $this->call(RolePermissionSeeder::class);
         $this->call(DossierAccessUserSeeder::class);
 
-        $cabinet = Cabinet::factory()->create([
-            'denomination' => 'Cabinet Demo',
+        /** @var Cabinet $cabinet */
+        $cabinet = Cabinet::withTrashed()->firstOrNew([
             'email_repondant' => 'contact@example.com',
         ]);
 
-        $cabinet->users()->create([
-            'nom' => 'Admin Demo',
-            'email' => 'admin@example.com',
-            'password' => 'password',
-            'email_verified_at' => now(),
-            'is_active' => true,
-        ])->assignRole(RoleEnum::Admin->value);
+        $cabinet->forceFill([
+            'denomination' => 'Cabinet Demo',
+            'statut_cabinet' => CabinetStatus::Active,
+            'deleted_at' => null,
+        ])->save();
 
-        User::factory()->systemAdmin()->create([
-            'nom' => 'Admin Systeme Demo',
-            'email' => 'sysadmin@example.com',
-            'password' => 'password',
+        /** @var User $admin */
+        $admin = User::withTrashed()->firstOrNew([
+            'email' => 'admin@example.com',
+        ]);
+
+        $admin->forceFill([
+            'cabinet_id' => $cabinet->id,
+            'nom' => 'Admin Demo',
+            'password' => Hash::make('password'),
             'email_verified_at' => now(),
             'is_active' => true,
-        ])->assignRole(RoleEnum::SystemAdmin->value);
+            'deleted_at' => null,
+        ])->save();
+
+        $admin->syncRoles([RoleEnum::Admin->value]);
+
+        /** @var User $sysadmin */
+        $sysadmin = User::withTrashed()->firstOrNew([
+            'email' => 'sysadmin@example.com',
+        ]);
+
+        $sysadmin->forceFill([
+            'nom' => 'Admin Systeme Demo',
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
+            'is_active' => true,
+            'deleted_at' => null,
+        ])->save();
+
+        $sysadmin->syncRoles([RoleEnum::SystemAdmin->value]);
     }
 }

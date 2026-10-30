@@ -7,6 +7,11 @@ mkdir -p storage/framework/{sessions,views,cache} storage/logs bootstrap/cache
 echo "==> [Railway Start] Running database migrations..."
 php artisan migrate --force
 
+if [ "${DB_SEED_ON_DEPLOY:-false}" = "true" ]; then
+    echo "==> [Railway Start] Seeding database..."
+    php artisan db:seed --force
+fi
+
 echo "==> [Railway Start] Linking public storage..."
 php artisan storage:link || true
 
