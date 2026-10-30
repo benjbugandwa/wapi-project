@@ -13,6 +13,7 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @livewireStyles
         @notifyCss
     </head>
     <body class="font-sans text-gray-900 antialiased">
@@ -28,6 +29,7 @@
             </div>
         </div>
 
+        @livewireScripts
         <x-notify::notify />
         @notifyJs
     </body>
