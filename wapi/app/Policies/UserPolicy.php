@@ -20,6 +20,11 @@ class UserPolicy
             && $user->canAccessCabinet($target->cabinet_id);
     }
 
+    public function create(User $user): bool
+    {
+        return $user->isSystemAdmin();
+    }
+
     public function activate(User $user, User $target): bool
     {
         return $user->can(PermissionEnum::ActivateUsers->value)

@@ -134,9 +134,11 @@
                 <h2 class="text-base font-semibold text-gray-900">{{ __('Charge de travail des collaborateurs du cabinet') }}</h2>
                 <p class="text-xs text-gray-500">{{ __('Répartition des dossiers et occupation de l équipe') }}</p>
             </div>
-            <a href="{{ route('admin.cabinet-invitations.index') }}" wire:navigate class="rounded-md bg-gray-900 px-3.5 py-2 text-xs font-medium text-white hover:bg-gray-800">
-                + {{ __('Inviter un membre') }}
-            </a>
+            @can('viewAny', \App\Models\User::class)
+                <a href="{{ route('admin.users.index') }}" wire:navigate class="rounded-md bg-gray-900 px-3.5 py-2 text-xs font-medium text-white hover:bg-gray-800">
+                    {{ __('Voir les collaborateurs') }}
+                </a>
+            @endcan
         </div>
 
         <table class="min-w-full divide-y divide-gray-200 text-sm">

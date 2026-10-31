@@ -69,12 +69,6 @@ new class extends Component
                             {{ __('Utilisateurs') }}
                         </x-nav-link>
                     @endcan
-
-                    @can('viewAny', \App\Models\CabinetInvitation::class)
-                        <x-nav-link :href="route('admin.cabinet-invitations.index')" :active="request()->routeIs('admin.cabinet-invitations.*')" wire:navigate>
-                            {{ __('Invitations') }}
-                        </x-nav-link>
-                    @endcan
                 </div>
             </div>
 
@@ -160,12 +154,6 @@ new class extends Component
             @can('viewAny', \App\Models\User::class)
                 <x-responsive-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')" wire:navigate>
                     {{ __('Utilisateurs') }}
-                </x-responsive-nav-link>
-            @endcan
-
-            @can('viewAny', \App\Models\CabinetInvitation::class)
-                <x-responsive-nav-link :href="route('admin.cabinet-invitations.index')" :active="request()->routeIs('admin.cabinet-invitations.*')" wire:navigate>
-                    {{ __('Invitations') }}
                 </x-responsive-nav-link>
             @endcan
         </div>

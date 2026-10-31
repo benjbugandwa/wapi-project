@@ -74,9 +74,6 @@ Route::middleware(['auth', 'verified', 'tenant.active'])->group(function () {
     Volt::route('admin/cabinets/create', 'admin.cabinets.create')
         ->name('admin.cabinets.create');
 
-    Volt::route('admin/cabinet-invitations', 'admin.cabinet-invitations.index')
-        ->name('admin.cabinet-invitations.index');
-
     Volt::route('admin/users', 'admin.users.index')
         ->name('admin.users.index');
 });
