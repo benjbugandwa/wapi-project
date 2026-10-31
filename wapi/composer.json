@@ -15,6 +15,7 @@
         "livewire/livewire": "^4.0",
         "livewire/volt": "^1.7.0",
         "mckenziearts/laravel-notify": "^2.7",
+        "resend/resend-php": "^1.17",
         "spatie/laravel-permission": "^6.25",
         "twilio/sdk": "*"
     },

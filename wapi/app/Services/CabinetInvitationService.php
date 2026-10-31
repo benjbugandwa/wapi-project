@@ -13,6 +13,7 @@ use App\Notifications\CabinetInvitationNotification;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Role;
@@ -24,13 +25,13 @@ class CabinetInvitationService
     ) {}
 
     /**
-     * @return array{invitation: CabinetInvitation, token: string}
+     * @return array{invitation: CabinetInvitation, token: string, mail_sent: bool, mail_error: ?string}
      */
     public function create(CreateCabinetInvitationData $data): array
     {
         $this->ensureAssignableRole($data->roleName, $data->inviter);
 
-        return DB::transaction(function () use ($data): array {
+        $result = DB::transaction(function () use ($data): array {
             $rawToken = Str::random(64);
 
             $invitation = CabinetInvitation::query()->updateOrCreate(
@@ -47,8 +48,6 @@ class CabinetInvitationService
                 ],
             );
 
-            $invitation->notify(new CabinetInvitationNotification($rawToken, $data->cabinet));
-
             $this->auditLogService->record(
                 action: 'cabinet_invitation.created',
                 user: $data->inviter,
@@ -59,6 +58,28 @@ class CabinetInvitationService
 
             return ['invitation' => $invitation, 'token' => $rawToken];
         });
+
+        $mailSent = true;
+        $mailError = null;
+
+        try {
+            $result['invitation']->notify(new CabinetInvitationNotification($result['token'], $data->cabinet));
+        } catch (\Throwable $e) {
+            Log::error('Échec d\'envoi de l\'email d\'invitation: '.$e->getMessage(), [
+                'invitation_id' => $result['invitation']->id,
+                'email' => $data->email,
+                'exception' => $e,
+            ]);
+            $mailSent = false;
+            $mailError = $e->getMessage();
+        }
+
+        return [
+            'invitation' => $result['invitation'],
+            'token' => $result['token'],
+            'mail_sent' => $mailSent,
+            'mail_error' => $mailError,
+        ];
     }
 
     public function accept(AcceptCabinetInvitationData $data): User

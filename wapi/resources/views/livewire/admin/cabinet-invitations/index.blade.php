@@ -16,6 +16,7 @@ new #[Layout('layouts.app')] class extends Component
     public ?string $cabinet_id = null;
     public string $email = '';
     public string $role_name = '';
+    public ?string $lastInvitationLink = null;
 
     public function mount(): void
     {
@@ -45,7 +46,7 @@ new #[Layout('layouts.app')] class extends Component
 
         abort_unless(auth()->user()->canAccessCabinet($cabinet), 403);
 
-        $invitationService->create(new CreateCabinetInvitationData(
+        $result = $invitationService->create(new CreateCabinetInvitationData(
             cabinet: $cabinet,
             email: $validated['email'],
             roleName: $validated['role_name'],
@@ -53,8 +54,18 @@ new #[Layout('layouts.app')] class extends Component
             expiresAt: CarbonImmutable::now()->addDays(7),
         ));
 
+        $this->lastInvitationLink = route('cabinet-invitations.accept', $result['token']);
         $this->reset('email');
-        notify()->success(__('Invitation envoyee.'), __('Succes'));
+        $this->dispatch('close-modal', 'cabinet-invitation-form');
+
+        if ($result['mail_sent']) {
+            notify()->success(__('Invitation envoyée avec succès.'), __('Succès'));
+        } else {
+            notify()->warning(
+                __("L'invitation a été enregistrée, mais l'envoi de l'email a échoué. Vous pouvez copier le lien d'invitation ci-dessous."),
+                __('Attention')
+            );
+        }
     }
 
     public function with(): array
@@ -80,6 +91,25 @@ new #[Layout('layouts.app')] class extends Component
 <div class="py-8">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <h1 class="text-xl font-semibold text-gray-900">{{ __('Invitations cabinet') }}</h1>
+
+        @if ($lastInvitationLink)
+            <div class="mt-4 rounded-md border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <p class="font-semibold">{{ __('Lien d\'invitation généré :') }}</p>
+                        <p class="mt-1 select-all font-mono text-xs text-amber-800 break-all">{{ $lastInvitationLink }}</p>
+                    </div>
+                    <button
+                        type="button"
+                        x-data=""
+                        x-on:click="navigator.clipboard.writeText('{{ $lastInvitationLink }}'); alert('{{ __('Lien copié dans le presse-papier !') }}')"
+                        class="shrink-0 rounded bg-amber-200 px-3 py-1.5 text-xs font-medium text-amber-900 hover:bg-amber-300 self-start sm:self-center"
+                    >
+                        {{ __('Copier le lien') }}
+                    </button>
+                </div>
+            </div>
+        @endif
 
         <x-loading-spinner target="invite" class="mt-4" />
 

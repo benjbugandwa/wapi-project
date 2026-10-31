@@ -54,3 +54,24 @@ test('cabinet admin cannot invite into another cabinet', function () {
         ->call('invite')
         ->assertForbidden();
 });
+
+test('invitation is created and generates link even if mail delivery fails', function () {
+    $cabinet = Cabinet::factory()->create();
+    $admin = User::factory()->for($cabinet)->create();
+    $admin->assignRole(RoleEnum::Admin->value);
+
+    $this->actingAs($admin);
+
+    Notification::shouldReceive('send')
+        ->andThrow(new \RuntimeException('Connection to mail host failed'));
+
+    Volt::test('admin.cabinet-invitations.index')
+        ->set('email', 'unreachable@example.com')
+        ->set('role_name', RoleEnum::Avocat->value)
+        ->call('invite')
+        ->assertHasNoErrors()
+        ->assertSee('Copier le lien');
+
+    expect(CabinetInvitation::query()->where('email', 'unreachable@example.com')->exists())->toBeTrue()
+        ->and(AuditLog::query()->where('action', 'cabinet_invitation.created')->exists())->toBeTrue();
+});
