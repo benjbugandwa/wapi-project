@@ -25,6 +25,10 @@ class DatabaseSeeder extends Seeder
 
         $cabinet->forceFill([
             'denomination' => 'Cabinet Demo',
+            'adresse_cabinet' => '1 Avenue de la Justice',
+            'nom_repondant' => 'Admin Repondant',
+            'telephone_repondant' => '+243000000000',
+            'description' => 'Cabinet principal de demonstration',
             'statut_cabinet' => CabinetStatus::Active,
             'deleted_at' => null,
         ])->save();

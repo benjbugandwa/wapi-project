@@ -63,7 +63,7 @@ class CabinetInvitationService
         $mailError = null;
 
         try {
-            $result['invitation']->notify(new CabinetInvitationNotification($result['token'], $data->cabinet));
+            $result['invitation']->notifyNow(new CabinetInvitationNotification($result['token'], $data->cabinet));
         } catch (\Throwable $e) {
             Log::error('Échec d\'envoi de l\'email d\'invitation: '.$e->getMessage(), [
                 'invitation_id' => $result['invitation']->id,

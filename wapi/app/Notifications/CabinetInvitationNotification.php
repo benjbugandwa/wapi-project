@@ -5,15 +5,11 @@ declare(strict_types=1);
 namespace App\Notifications;
 
 use App\Models\Cabinet;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class CabinetInvitationNotification extends Notification implements ShouldQueue
+class CabinetInvitationNotification extends Notification
 {
-    use Queueable;
-
     public function __construct(
         private readonly string $token,
         private readonly Cabinet $cabinet,
