@@ -7,42 +7,46 @@
 .zed/
 
 # Dependencies & Build
-wapi/vendor/
-wapi/node_modules/
-wapi/public/build/
-wapi/public/hot
-wapi/public/storage
-wapi/package-lock.json
+/vendor/
+/node_modules/
+/public/build/
+/public/hot
+/public/storage
+npm-debug.log
+yarn-error.log
 
 # Environment & Keys
-wapi/.env
-wapi/.env.backup
-wapi/.env.production
-wapi/storage/*.key
-wapi/auth.json
+.env
+.env.backup
+.env.production
+/storage/*.key
+/storage/pail
+/auth.json
+Homestead.json
+Homestead.yaml
+.phpactor.json
 
 # Logs & Cache
-wapi/storage/logs/*.log
-wapi/storage/framework/cache/data/*
-!wapi/storage/framework/cache/data/.gitignore
-wapi/storage/framework/sessions/*
-!wapi/storage/framework/sessions/.gitignore
-wapi/storage/framework/views/*
-!wapi/storage/framework/views/.gitignore
-wapi/storage/app/public/*
-!wapi/storage/app/public/.gitignore
-wapi/.phpunit.result.cache
-wapi/.phpunit.cache
+/storage/logs/*.log
+/storage/framework/cache/data/*
+!/storage/framework/cache/data/.gitignore
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitignore
+/storage/framework/views/*
+!/storage/framework/views/.gitignore
+/storage/app/public/*
+!/storage/app/public/.gitignore
+.phpunit.result.cache
+.phpunit.cache
 
 # Mailpit binaries & logs
-wapi/tools/mailpit/*.exe
-wapi/tools/mailpit/*.zip
-wapi/tools/mailpit/*.db
-wapi/tools/mailpit/*.db-shm
-wapi/tools/mailpit/*.db-wal
-wapi/tools/mailpit/*.log
+tools/mailpit/*.exe
+tools/mailpit/*.zip
+tools/mailpit/*.db
+tools/mailpit/*.db-shm
+tools/mailpit/*.db-wal
+tools/mailpit/*.log
 
 # Documentation (local only)
 /docs/
 docs/
-wapi/docs/
