@@ -41,3 +41,8 @@ wapi/tools/mailpit/*.db
 wapi/tools/mailpit/*.db-shm
 wapi/tools/mailpit/*.db-wal
 wapi/tools/mailpit/*.log
+
+# Documentation (local only)
+/docs/
+docs/
+wapi/docs/
