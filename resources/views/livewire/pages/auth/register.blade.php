@@ -3,6 +3,8 @@
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
@@ -11,23 +13,68 @@ new #[Layout('layouts.guest')] class extends Component
 {
     public string $nom = '';
     public string $email = '';
+    public string $telephone = '';
+    public string $phone_number = '';
     public string $password = '';
     public string $password_confirmation = '';
+
+    /**
+     * Normaliser le numéro de téléphone pour garantir le format international +243XXXXXXXXX.
+     */
+    public function normalizePhoneNumber(string $value): string
+    {
+        $digits = preg_replace('/\D+/', '', $value) ?? '';
+
+        if (str_starts_with($digits, '243') && strlen($digits) === 12) {
+            return '+'.$digits;
+        }
+
+        if (str_starts_with($digits, '0') && strlen($digits) === 10) {
+            return '+243'.substr($digits, 1);
+        }
+
+        if (strlen($digits) === 9) {
+            return '+243'.$digits;
+        }
+
+        return ! empty($digits) ? '+243'.$digits : '';
+    }
 
     /**
      * Handle an incoming registration request.
      */
     public function register(): void
     {
-        $validated = $this->validate([
+        $rawPhone = ! empty($this->telephone) ? $this->telephone : $this->phone_number;
+        $normalizedPhone = $this->normalizePhoneNumber($rawPhone);
+
+        $validator = Validator::make([
+            'nom' => $this->nom,
+            'email' => $this->email,
+            'telephone' => $normalizedPhone,
+            'password' => $this->password,
+            'password_confirmation' => $this->password_confirmation,
+        ], [
             'nom' => ['required', 'string', 'max:150'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email'],
+            'telephone' => [
+                'required',
+                'regex:/^\+243[0-9]{9}$/',
+                Rule::unique('users', 'phone_number')->whereNull('deleted_at'),
+            ],
             'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
+        ], [
+            'telephone.required' => __('Le numéro de téléphone est obligatoire.'),
+            'telephone.regex' => __('Le numéro de téléphone doit respecter le format +243 suivi de 9 chiffres (ex: 970480293).'),
+            'telephone.unique' => __('Ce numéro de téléphone est déjà associé à un compte.'),
         ]);
+
+        $validated = $validator->validate();
 
         $user = User::query()->forceCreate([
             'nom' => $validated['nom'],
             'email' => $validated['email'],
+            'phone_number' => $validated['telephone'],
             'password' => Hash::make($validated['password']),
             'is_active' => false,
             'cabinet_id' => null,
@@ -73,6 +120,25 @@ new #[Layout('layouts.guest')] class extends Component
             <x-input-label for="email" :value="__('Adresse email')" />
             <x-text-input wire:model="email" id="email" class="block mt-1 w-full" type="email" name="email" required autocomplete="username" placeholder="{{ __('ex: jean.dupont@example.com') }}" />
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        </div>
+
+        <!-- Numéro de téléphone -->
+        <div class="mt-4">
+            <x-input-label for="telephone" :value="__('Numéro de téléphone')" />
+            <div class="mt-1 flex rounded-md shadow-xs">
+                <span class="inline-flex items-center px-3.5 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-700 text-sm font-medium select-none">
+                    🇨🇩 +243
+                </span>
+                <x-text-input wire:model="telephone" id="telephone"
+                    class="rounded-l-none block w-full"
+                    type="tel"
+                    name="telephone"
+                    required
+                    autocomplete="tel-national"
+                    placeholder="970480293" />
+            </div>
+            <p class="mt-1 text-xs text-gray-500">{{ __('Format attendu : 9 chiffres après +243 (ex: 970480293). Requis pour les notifications SMS.') }}</p>
+            <x-input-error :messages="$errors->get('telephone')" class="mt-2" />
         </div>
 
         <!-- Mot de passe -->

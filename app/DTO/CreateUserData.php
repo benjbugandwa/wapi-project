@@ -13,5 +13,6 @@ final readonly class CreateUserData
         public string $roleName,
         public ?string $cabinetId = null,
         public bool $isActive = true,
+        public ?string $phoneNumber = null,
     ) {}
 }

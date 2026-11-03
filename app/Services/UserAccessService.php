@@ -44,6 +44,7 @@ class UserAccessService
                 'cabinet_id' => $data->roleName === RoleEnum::SystemAdmin->value ? null : $data->cabinetId,
                 'nom' => $data->nom,
                 'email' => $data->email,
+                'phone_number' => $data->phoneNumber,
                 'password' => Hash::make($data->password),
                 'is_active' => $data->isActive,
                 'email_verified_at' => now(),
