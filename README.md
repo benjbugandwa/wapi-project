@@ -16,10 +16,10 @@ Wapi est un SaaS multi-tenant de gestion de cabinets d'avocats.
 
 ## Installation Locale
 
-Le projet applicatif Laravel se trouve dans :
+Le projet applicatif Laravel se trouve directement à la racine du dépôt :
 
 ```text
-C:\xampp\htdocs\wapi-project\wapi
+C:\xampp\htdocs\wapi-project
 ```
 
 Installer les dépendances PHP :
