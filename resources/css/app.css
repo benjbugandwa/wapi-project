@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+    /* Style par défaut pour les boutons d'action et soumission */
+    button[type="submit"]:not([class*="bg-"]),
+    .btn-dark {
+        background-color: #111827 !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+    }
+}
