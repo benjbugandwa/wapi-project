@@ -38,11 +38,11 @@
                     </p>
 
                     <div class="mt-8 flex flex-wrap gap-3">
-                        <a href="{{ route('login') }}" class="rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-950 hover:bg-gray-100">
+                        <a href="{{ route('login') }}" class="inline-flex items-center rounded-md bg-white px-5 py-2.5 text-sm font-semibold text-gray-950 shadow-sm hover:bg-gray-100 transition">
                             {{ __('Se connecter') }}
                         </a>
                         @if (Route::has('register'))
-                            <a href="{{ route('register') }}" class="rounded-md border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20">
+                            <a href="{{ route('register') }}" class="inline-flex items-center rounded-md border border-indigo-500 bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 transition">
                                 {{ __('Créer un compte') }}
                             </a>
                         @endif

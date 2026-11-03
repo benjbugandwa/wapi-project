@@ -523,17 +523,17 @@ new #[Layout('layouts.app')] class extends Component
                                         type="button"
                                         wire:click="updateRole('{{ $user->id }}')"
                                         wire:loading.attr="disabled"
-                                        class="text-sm font-medium text-gray-900 hover:text-gray-700"
+                                        class="inline-flex items-center rounded-md bg-gray-900 px-3 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900 transition"
                                     >{{ __('Enregistrer') }}</button>
                                 </div>
                             </td>
                             <td class="px-4 py-3 text-right">
-                                <div class="flex items-center justify-end gap-3">
+                                <div class="flex items-center justify-end gap-2">
                                     @if (auth()->user()->isSystemAdmin())
                                         <button
                                             type="button"
                                             wire:click="openEditModal('{{ $user->id }}')"
-                                            class="text-sm font-medium text-indigo-600 hover:text-indigo-900"
+                                            class="inline-flex items-center rounded-md border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700 shadow-2xs hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
                                         >{{ __('Editer') }}</button>
                                     @endif
 
@@ -543,7 +543,7 @@ new #[Layout('layouts.app')] class extends Component
                                             wire:click="deactivate('{{ $user->id }}')"
                                             wire:confirm="{{ __('Voulez-vous vraiment desactiver cet utilisateur ?') }}"
                                             wire:loading.attr="disabled"
-                                            class="text-sm font-medium text-amber-700 hover:text-amber-900"
+                                            class="inline-flex items-center rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 shadow-2xs hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-500 transition"
                                         >{{ __('Desactiver') }}</button>
                                     @else
                                         <button
@@ -551,7 +551,7 @@ new #[Layout('layouts.app')] class extends Component
                                             wire:click="activate('{{ $user->id }}')"
                                             wire:confirm="{{ __('Voulez-vous vraiment activer cet utilisateur ?') }}"
                                             wire:loading.attr="disabled"
-                                            class="text-sm font-medium text-green-700 hover:text-green-900"
+                                            class="inline-flex items-center rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 shadow-2xs hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
                                         >{{ __('Activer') }}</button>
                                     @endif
                                 </div>

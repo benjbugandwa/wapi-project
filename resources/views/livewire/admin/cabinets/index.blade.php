@@ -88,7 +88,7 @@ new #[Layout('layouts.app')] class extends Component
                                         wire:click="suspend('{{ $cabinet->id }}')"
                                         wire:confirm="{{ __('Voulez-vous vraiment suspendre ce cabinet ?') }}"
                                         wire:loading.attr="disabled"
-                                        class="text-sm font-medium text-amber-700 hover:text-amber-900"
+                                        class="inline-flex items-center rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 shadow-2xs hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-500 transition"
                                     >{{ __('Suspendre') }}</button>
                                 @else
                                     <button
@@ -96,7 +96,7 @@ new #[Layout('layouts.app')] class extends Component
                                         wire:click="activate('{{ $cabinet->id }}')"
                                         wire:confirm="{{ __('Voulez-vous vraiment reactiver ce cabinet ?') }}"
                                         wire:loading.attr="disabled"
-                                        class="text-sm font-medium text-green-700 hover:text-green-900"
+                                        class="inline-flex items-center rounded-md border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 shadow-2xs hover:bg-emerald-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
                                     >{{ __('Reactiver') }}</button>
                                 @endif
                             </td>
