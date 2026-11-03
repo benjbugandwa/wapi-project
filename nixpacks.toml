@@ -1,9 +1,20 @@
-﻿# nixpacks.toml - Configuration Railway / Nixpacks optimisée pour Wapi
-providers = ["php", "node"]
+# nixpacks.toml - Configuration Railway / Nixpacks optimisée pour Wapi
+providers = ["php"]
+
+[phases.setup]
+nixPkgs = [
+    "...",
+    "nodejs_20"
+]
 
 [variables]
 NIXPACKS_PHP_ROOT_DIR = "/app/public"
-NIXPACKS_NODE_VERSION = "20"
+
+[phases.install]
+cmds = [
+    "composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction",
+    "npm ci"
+]
 
 [phases.build]
 cmds = [
@@ -13,3 +24,4 @@ cmds = [
 
 [start]
 cmd = "bash scripts/railway-start.sh"
+
