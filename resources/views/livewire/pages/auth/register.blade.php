@@ -82,10 +82,10 @@ new #[Layout('layouts.guest')] class extends Component
 
         event(new Registered($user));
 
-        session()->flash('status', __('Votre compte a ete cree avec succes. Un administrateur va lui attribuer un role et un cabinet avant de l activer.'));
-        notify()->success(__('Votre compte a ete cree avec succes. Un administrateur va lui attribuer un role et un cabinet avant de l activer.'), __('Succes'));
+        session()->flash('status', __('Vous serez notifié une fois que votre compte sera activé par un administrateur.'));
+        notify()->success(__('Vous serez notifié une fois que votre compte sera activé par un administrateur.'), __('Compte créé'));
 
-        $this->redirect(route('login', absolute: false), navigate: true);
+        $this->redirect(route('home', absolute: false), navigate: true);
     }
 }; ?>
 

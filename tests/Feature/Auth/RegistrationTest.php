@@ -29,7 +29,9 @@ test('new users can register directly without invitation', function () {
 
     $component
         ->assertHasNoErrors()
-        ->assertRedirect(route('login', absolute: false));
+        ->assertRedirect('/');
+
+    expect(session('status'))->toBe(__('Vous serez notifié une fois que votre compte sera activé par un administrateur.'));
 
     $user = User::query()->where('email', 'avocat.nouveau@wapi.test')->first();
 
@@ -110,4 +112,14 @@ test('registration rejects duplicate phone number', function () {
         ->call('register')
         ->assertHasErrors(['telephone']);
 });
+
+test('welcome screen displays activation waiting status message', function () {
+    $this->withSession([
+        'status' => 'Vous serez notifié une fois que votre compte sera activé par un administrateur.',
+    ])
+        ->get('/')
+        ->assertOk()
+        ->assertSee('Vous serez notifié une fois que votre compte sera activé par un administrateur.');
+});
+
 

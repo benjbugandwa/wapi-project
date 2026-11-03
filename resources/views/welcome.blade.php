@@ -9,6 +9,7 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
 
+        @notifyCss
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased">
@@ -22,6 +23,23 @@
                     <livewire:welcome.navigation />
                 @endif
             </header>
+
+            @if (session('status'))
+                <div class="mx-auto max-w-7xl px-6 pt-2">
+                    <div class="rounded-xl border border-emerald-500/40 bg-emerald-950/80 p-4 text-emerald-200 shadow-lg flex items-center gap-3">
+                        <div class="shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-semibold text-sm sm:text-base text-white">
+                                {{ session('status') }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            @endif
 
             <main class="mx-auto grid max-w-7xl gap-10 px-6 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-center lg:py-24">
                 <section>
@@ -71,5 +89,8 @@
                 </section>
             </main>
         </div>
+
+        <x-notify::notify />
+        @notifyJs
     </body>
 </html>
