@@ -1,6 +1,7 @@
 <?php
 
 use App\DTO\CreateUserData;
+use App\DTO\EditUserAssignmentData;
 use App\DTO\UpdateUserRoleData;
 use App\Enums\CabinetStatus;
 use App\Enums\RoleEnum;
@@ -19,11 +20,20 @@ new #[Layout('layouts.app')] class extends Component
      */
     public array $roleUpdates = [];
 
+    // Properties for creating user ("Nouveau")
     public string $nom = '';
     public string $email = '';
     public string $password = '';
     public string $role_name = RoleEnum::Avocat->value;
     public ?string $cabinet_id = '';
+
+    // Properties for editing user assignment ("Éditer")
+    public ?string $editingUserId = null;
+    public string $editingUserNom = '';
+    public string $editingUserEmail = '';
+    public string $editingUserRole = RoleEnum::Avocat->value;
+    public ?string $editingUserCabinetId = '';
+    public bool $editingUserIsActive = false;
 
     public function mount(): void
     {
@@ -88,6 +98,71 @@ new #[Layout('layouts.app')] class extends Component
         $this->dispatch('close-modal', 'create-user-modal');
 
         notify()->success(__('Utilisateur créé avec succès.'), __('Succès'));
+    }
+
+    public function openEditModal(string $userId): void
+    {
+        $target = User::query()->with(['cabinet', 'roles'])->findOrFail($userId);
+
+        Gate::authorize('update', $target);
+
+        $this->resetErrorBag();
+        $this->editingUserId = $target->id;
+        $this->editingUserNom = $target->nom;
+        $this->editingUserEmail = $target->email;
+        $this->editingUserRole = $target->roles->first()?->name ?? RoleEnum::Avocat->value;
+        $this->editingUserCabinetId = $target->cabinet_id ?? '';
+        $this->editingUserIsActive = (bool) $target->is_active;
+
+        $this->dispatch('open-modal', 'edit-user-modal');
+    }
+
+    public function resetEditForm(): void
+    {
+        $this->resetErrorBag();
+        $this->editingUserId = null;
+        $this->editingUserNom = '';
+        $this->editingUserEmail = '';
+        $this->editingUserRole = RoleEnum::Avocat->value;
+        $this->editingUserCabinetId = '';
+        $this->editingUserIsActive = false;
+    }
+
+    public function updateUserAssignment(UserAccessService $userAccessService): void
+    {
+        abort_unless($this->editingUserId !== null, 404);
+
+        $target = User::query()->with(['cabinet', 'roles'])->findOrFail($this->editingUserId);
+
+        Gate::authorize('update', $target);
+
+        $isSystemAdminRole = $this->editingUserRole === RoleEnum::SystemAdmin->value;
+
+        $validated = $this->validate([
+            'editingUserRole' => ['required', 'string', Rule::in(RoleEnum::values())],
+            'editingUserCabinetId' => [
+                $isSystemAdminRole ? 'nullable' : 'required',
+                'uuid',
+                Rule::exists('cabinets', 'id')->where('statut_cabinet', CabinetStatus::Active->value),
+            ],
+            'editingUserIsActive' => ['boolean'],
+        ], [
+            'editingUserCabinetId.required' => __('Veuillez sélectionner un cabinet actif pour cet utilisateur.'),
+        ]);
+
+        $userAccessService->updateUserAssignment(new EditUserAssignmentData(
+            target: $target,
+            roleName: $validated['editingUserRole'],
+            cabinetId: ! empty($validated['editingUserCabinetId']) ? $validated['editingUserCabinetId'] : null,
+            isActive: $validated['editingUserIsActive'],
+        ), auth()->user());
+
+        $this->roleUpdates[$target->id] = $validated['editingUserRole'];
+
+        $this->resetEditForm();
+        $this->dispatch('close-modal', 'edit-user-modal');
+
+        notify()->success(__('Utilisateur mis à jour avec succès.'), __('Succès'));
     }
 
     public function activate(string $userId, UserAccessService $userAccessService): void
@@ -188,10 +263,11 @@ new #[Layout('layouts.app')] class extends Component
             @endif
         </div>
 
-        <x-loading-spinner target="activate,deactivate,updateRole,createUser,openCreateModal" class="mt-4" />
+        <x-loading-spinner target="activate,deactivate,updateRole,createUser,openCreateModal,openEditModal,updateUserAssignment" class="mt-4" />
 
         @if (auth()->user()->isSystemAdmin())
-            <x-modal name="create-user-modal" :show="$errors->isNotEmpty()" focusable>
+            {{-- Modal Nouveau Utilisateur --}}
+            <x-modal name="create-user-modal" :show="$errors->has('nom') || $errors->has('email') || $errors->has('password') || $errors->has('role_name') || $errors->has('cabinet_id')" focusable>
                 <form wire:submit="createUser" class="p-6">
                     <div class="flex items-center justify-between border-b border-gray-100 pb-3">
                         <div>
@@ -313,6 +389,108 @@ new #[Layout('layouts.app')] class extends Component
                     </div>
                 </form>
             </x-modal>
+
+            {{-- Modal Éditer Utilisateur (Attribution Rôle & Cabinet) --}}
+            <x-modal name="edit-user-modal" :show="$errors->has('editingUserRole') || $errors->has('editingUserCabinetId') || $errors->has('editingUserIsActive')" focusable>
+                <form wire:submit="updateUserAssignment" class="p-6">
+                    <div class="flex items-center justify-between border-b border-gray-100 pb-3">
+                        <div>
+                            <h2 class="text-lg font-medium text-gray-900">
+                                {{ __('Éditer l\'utilisateur') }}
+                            </h2>
+                            <p class="mt-1 text-sm text-gray-600">
+                                {{ __('Attribuez un rôle et associez l\'utilisateur à un cabinet actif.') }}
+                            </p>
+                        </div>
+                        <button type="button" x-on:click="$dispatch('close')" wire:click="resetEditForm" class="text-gray-400 hover:text-gray-500">
+                            <span class="sr-only">{{ __('Fermer') }}</span>
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Récapitulatif utilisateur -->
+                    <div class="mt-4 rounded-md border border-gray-200 bg-gray-50 p-4">
+                        <p class="text-xs font-semibold uppercase tracking-wider text-gray-500">{{ __('Utilisateur sélectionné') }}</p>
+                        <p class="mt-1 text-sm font-medium text-gray-900">{{ $editingUserNom }}</p>
+                        <p class="text-xs text-gray-600">{{ $editingUserEmail }}</p>
+                    </div>
+
+                    <div class="mt-6 space-y-4">
+                        <!-- Rôle -->
+                        <div>
+                            <x-input-label for="edit_role" :value="__('Rôle')" />
+                            <select
+                                id="edit_role"
+                                wire:model.live="editingUserRole"
+                                class="mt-1 block w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                required
+                            >
+                                <option value="{{ \App\Enums\RoleEnum::Avocat->value }}">{{ \App\Enums\RoleEnum::Avocat->label() }}</option>
+                                <option value="{{ \App\Enums\RoleEnum::Comptable->value }}">{{ \App\Enums\RoleEnum::Comptable->label() }}</option>
+                                <option value="{{ \App\Enums\RoleEnum::Stagiaire->value }}">{{ \App\Enums\RoleEnum::Stagiaire->label() }}</option>
+                                <option value="{{ \App\Enums\RoleEnum::Secretaire->value }}">{{ \App\Enums\RoleEnum::Secretaire->label() }}</option>
+                                <option value="{{ \App\Enums\RoleEnum::Admin->value }}">{{ \App\Enums\RoleEnum::Admin->label() }}</option>
+                                <option value="{{ \App\Enums\RoleEnum::SystemAdmin->value }}">{{ \App\Enums\RoleEnum::SystemAdmin->label() }}</option>
+                            </select>
+                            <x-input-error :messages="$errors->get('editingUserRole')" class="mt-2" />
+                        </div>
+
+                        <!-- Cabinet -->
+                        <div>
+                            <x-input-label for="edit_cabinet" :value="__('Cabinet')" />
+                            <select
+                                id="edit_cabinet"
+                                wire:model="editingUserCabinetId"
+                                class="mt-1 block w-full rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                @if ($editingUserRole !== \App\Enums\RoleEnum::SystemAdmin->value) required @endif
+                            >
+                                @if ($editingUserRole === \App\Enums\RoleEnum::SystemAdmin->value)
+                                    <option value="">{{ __('Aucun cabinet (Administrateur système global)') }}</option>
+                                @else
+                                    <option value="">{{ __('-- Sélectionner un cabinet --') }}</option>
+                                @endif
+                                @foreach ($activeCabinets as $cabinet)
+                                    <option value="{{ $cabinet->id }}">{{ $cabinet->denomination }}</option>
+                                @endforeach
+                            </select>
+                            @if ($editingUserRole === \App\Enums\RoleEnum::SystemAdmin->value)
+                                <p class="mt-1 text-xs text-gray-500">{{ __('Les administrateurs système ont un accès global à l\'ensemble de la plateforme.') }}</p>
+                            @endif
+                            <x-input-error :messages="$errors->get('editingUserCabinetId')" class="mt-2" />
+                        </div>
+
+                        <!-- Compte actif -->
+                        <div class="pt-2">
+                            <label for="edit_is_active" class="inline-flex items-center">
+                                <input
+                                    id="edit_is_active"
+                                    wire:model="editingUserIsActive"
+                                    type="checkbox"
+                                    class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                                >
+                                <span class="ms-2 text-sm font-medium text-gray-700">{{ __('Compte actif (autoriser la connexion)') }}</span>
+                            </label>
+                            <x-input-error :messages="$errors->get('editingUserIsActive')" class="mt-2" />
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex justify-end gap-3 border-t border-gray-100 pt-4">
+                        <x-secondary-button
+                            type="button"
+                            x-on:click="$dispatch('close')"
+                            wire:click="resetEditForm"
+                        >
+                            {{ __('Annuler') }}
+                        </x-secondary-button>
+
+                        <x-primary-button wire:loading.attr="disabled">
+                            {{ __('Enregistrer les modifications') }}
+                        </x-primary-button>
+                    </div>
+                </form>
+            </x-modal>
         @endif
 
         <div class="mt-6 overflow-hidden border border-gray-200 bg-white shadow-sm sm:rounded-lg">
@@ -331,7 +509,7 @@ new #[Layout('layouts.app')] class extends Component
                     @forelse ($users as $user)
                         <tr>
                             <td class="px-4 py-3 font-medium text-gray-900">{{ $user->nom }}</td>
-                            <td class="px-4 py-3 text-gray-600">{{ $user->cabinet?->denomination ?? __('Systeme') }}</td>
+                            <td class="px-4 py-3 text-gray-600">{{ $user->cabinet?->denomination ?? ($user->isSystemAdmin() ? __('Systeme') : __('Non attribue')) }}</td>
                             <td class="px-4 py-3 text-gray-600">{{ $user->email }}</td>
                             <td class="px-4 py-3 text-gray-600">{{ $user->is_active ? __('Oui') : __('Non') }}</td>
                             <td class="px-4 py-3">
@@ -350,23 +528,33 @@ new #[Layout('layouts.app')] class extends Component
                                 </div>
                             </td>
                             <td class="px-4 py-3 text-right">
-                                @if ($user->is_active)
-                                    <button
-                                        type="button"
-                                        wire:click="deactivate('{{ $user->id }}')"
-                                        wire:confirm="{{ __('Voulez-vous vraiment desactiver cet utilisateur ?') }}"
-                                        wire:loading.attr="disabled"
-                                        class="text-sm font-medium text-amber-700 hover:text-amber-900"
-                                    >{{ __('Desactiver') }}</button>
-                                @else
-                                    <button
-                                        type="button"
-                                        wire:click="activate('{{ $user->id }}')"
-                                        wire:confirm="{{ __('Voulez-vous vraiment activer cet utilisateur ?') }}"
-                                        wire:loading.attr="disabled"
-                                        class="text-sm font-medium text-green-700 hover:text-green-900"
-                                    >{{ __('Activer') }}</button>
-                                @endif
+                                <div class="flex items-center justify-end gap-3">
+                                    @if (auth()->user()->isSystemAdmin())
+                                        <button
+                                            type="button"
+                                            wire:click="openEditModal('{{ $user->id }}')"
+                                            class="text-sm font-medium text-indigo-600 hover:text-indigo-900"
+                                        >{{ __('Editer') }}</button>
+                                    @endif
+
+                                    @if ($user->is_active)
+                                        <button
+                                            type="button"
+                                            wire:click="deactivate('{{ $user->id }}')"
+                                            wire:confirm="{{ __('Voulez-vous vraiment desactiver cet utilisateur ?') }}"
+                                            wire:loading.attr="disabled"
+                                            class="text-sm font-medium text-amber-700 hover:text-amber-900"
+                                        >{{ __('Desactiver') }}</button>
+                                    @else
+                                        <button
+                                            type="button"
+                                            wire:click="activate('{{ $user->id }}')"
+                                            wire:confirm="{{ __('Voulez-vous vraiment activer cet utilisateur ?') }}"
+                                            wire:loading.attr="disabled"
+                                            class="text-sm font-medium text-green-700 hover:text-green-900"
+                                        >{{ __('Activer') }}</button>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                     @empty

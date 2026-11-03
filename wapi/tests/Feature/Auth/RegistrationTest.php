@@ -2,15 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
-use App\DTO\CreateCabinetInvitationData;
-use App\Enums\RoleEnum;
-use App\Models\Cabinet;
 use App\Models\User;
-use App\Notifications\CabinetInvitationNotification;
-use App\Services\CabinetInvitationService;
-use Carbon\CarbonImmutable;
-use Database\Seeders\RolePermissionSeeder;
-use Illuminate\Support\Facades\Notification;
 use Livewire\Volt\Volt;
 
 test('registration screen can be rendered', function () {
@@ -19,46 +11,16 @@ test('registration screen can be rendered', function () {
     $response
         ->assertOk()
         ->assertSeeVolt('pages.auth.register')
-        ->assertSee('L inscription necessite une invitation cabinet valide');
+        ->assertSee('Attribution du role et du cabinet')
+        ->assertSee('Creer mon compte');
 });
 
-test('new users cannot register without invitation', function () {
+test('new users can register directly without invitation', function () {
     $component = Volt::test('pages.auth.register')
-        ->set('nom', 'Test User')
-        ->set('password', 'password')
-        ->set('password_confirmation', 'password');
-
-    $component->call('register');
-
-    $component
-        ->assertHasErrors('token')
-        ->assertNoRedirect();
-
-    $this->assertGuest();
-});
-
-test('new users can accept a cabinet invitation', function () {
-    Notification::fake();
-    $this->seed(RolePermissionSeeder::class);
-
-    $cabinet = Cabinet::factory()->create();
-    $inviter = User::factory()->for($cabinet)->create();
-    $inviter->assignRole(RoleEnum::Admin->value);
-
-    $payload = app(CabinetInvitationService::class)->create(new CreateCabinetInvitationData(
-        cabinet: $cabinet,
-        email: 'invitee@example.com',
-        roleName: RoleEnum::Avocat->value,
-        inviter: $inviter,
-        expiresAt: CarbonImmutable::now()->addDays(7),
-    ));
-
-    Notification::assertSentTimes(CabinetInvitationNotification::class, 1);
-
-    $component = Volt::test('pages.auth.register', ['token' => $payload['token']])
-        ->set('nom', 'Invitee User')
-        ->set('password', 'password')
-        ->set('password_confirmation', 'password');
+        ->set('nom', 'Nouvel Avocat')
+        ->set('email', 'avocat.nouveau@wapi.test')
+        ->set('password', 'password123')
+        ->set('password_confirmation', 'password123');
 
     $component->call('register');
 
@@ -66,11 +28,22 @@ test('new users can accept a cabinet invitation', function () {
         ->assertHasNoErrors()
         ->assertRedirect(route('login', absolute: false));
 
-    $user = User::query()->where('email', 'invitee@example.com')->firstOrFail();
+    $user = User::query()->where('email', 'avocat.nouveau@wapi.test')->first();
 
-    expect($user->cabinet->is($cabinet))->toBeTrue()
+    expect($user)->not->toBeNull()
+        ->and($user->nom)->toBe('Nouvel Avocat')
         ->and($user->is_active)->toBeFalse()
-        ->and($user->hasRole(RoleEnum::Avocat->value))->toBeTrue();
+        ->and($user->cabinet_id)->toBeNull();
 
     $this->assertGuest();
+});
+
+test('registration validates required fields, email format and password confirmation', function () {
+    Volt::test('pages.auth.register')
+        ->set('nom', '')
+        ->set('email', 'invalid-email')
+        ->set('password', 'short')
+        ->set('password_confirmation', 'mismatch')
+        ->call('register')
+        ->assertHasErrors(['nom', 'email', 'password']);
 });

@@ -162,3 +162,109 @@ test('user creation validates required fields and active cabinet', function () {
         ->call('createUser')
         ->assertHasErrors(['email', 'cabinet_id']);
 });
+
+test('system admin can view editer button and assign role and cabinet to an unassigned user', function () {
+    $systemAdmin = User::factory()->create();
+    $systemAdmin->assignRole(RoleEnum::SystemAdmin->value);
+
+    $cabinet = Cabinet::factory()->create([
+        'statut_cabinet' => CabinetStatus::Active,
+    ]);
+
+    $unassignedUser = User::factory()->inactive()->create([
+        'cabinet_id' => null,
+    ]);
+
+    $this->actingAs($systemAdmin);
+
+    Volt::test('admin.users.index')
+        ->assertSee('Editer')
+        ->call('openEditModal', $unassignedUser->id)
+        ->assertDispatched('open-modal', 'edit-user-modal')
+        ->assertSet('editingUserId', $unassignedUser->id)
+        ->assertSet('editingUserNom', $unassignedUser->nom)
+        ->assertSet('editingUserEmail', $unassignedUser->email)
+        ->set('editingUserRole', RoleEnum::Comptable->value)
+        ->set('editingUserCabinetId', $cabinet->id)
+        ->set('editingUserIsActive', true)
+        ->call('updateUserAssignment')
+        ->assertHasNoErrors()
+        ->assertDispatched('close-modal', 'edit-user-modal');
+
+    $unassignedUser->refresh();
+
+    expect($unassignedUser->is_active)->toBeTrue()
+        ->and($unassignedUser->cabinet_id)->toBe($cabinet->id)
+        ->and($unassignedUser->hasRole(RoleEnum::Comptable->value))->toBeTrue()
+        ->and(AuditLog::query()->where('auditable_id', $unassignedUser->id)->where('action', 'user.assigned')->exists())->toBeTrue();
+});
+
+test('system admin can assign system admin role without cabinet via edit modal', function () {
+    $systemAdmin = User::factory()->create();
+    $systemAdmin->assignRole(RoleEnum::SystemAdmin->value);
+
+    $targetUser = User::factory()->create();
+
+    $this->actingAs($systemAdmin);
+
+    Volt::test('admin.users.index')
+        ->call('openEditModal', $targetUser->id)
+        ->set('editingUserRole', RoleEnum::SystemAdmin->value)
+        ->set('editingUserCabinetId', '')
+        ->call('updateUserAssignment')
+        ->assertHasNoErrors();
+
+    $targetUser->refresh();
+
+    expect($targetUser->cabinet_id)->toBeNull()
+        ->and($targetUser->hasRole(RoleEnum::SystemAdmin->value))->toBeTrue();
+});
+
+test('cabinet admin cannot view editer button or update user assignment', function () {
+    $cabinet = Cabinet::factory()->create();
+    $cabinetAdmin = User::factory()->for($cabinet)->create();
+    $cabinetAdmin->assignRole(RoleEnum::Admin->value);
+
+    $target = User::factory()->for($cabinet)->create();
+
+    $this->actingAs($cabinetAdmin);
+
+    Volt::test('admin.users.index')
+        ->assertDontSee('Editer')
+        ->call('openEditModal', $target->id)
+        ->assertForbidden();
+
+    Volt::test('admin.users.index')
+        ->set('editingUserId', $target->id)
+        ->set('editingUserRole', RoleEnum::Avocat->value)
+        ->set('editingUserCabinetId', $cabinet->id)
+        ->call('updateUserAssignment')
+        ->assertForbidden();
+});
+
+test('user assignment validates role and active cabinet', function () {
+    $systemAdmin = User::factory()->create();
+    $systemAdmin->assignRole(RoleEnum::SystemAdmin->value);
+
+    $suspendedCabinet = Cabinet::factory()->create([
+        'statut_cabinet' => CabinetStatus::Suspended,
+    ]);
+
+    $target = User::factory()->create();
+
+    $this->actingAs($systemAdmin);
+
+    Volt::test('admin.users.index')
+        ->call('openEditModal', $target->id)
+        ->set('editingUserRole', RoleEnum::Avocat->value)
+        ->set('editingUserCabinetId', '')
+        ->call('updateUserAssignment')
+        ->assertHasErrors(['editingUserCabinetId']);
+
+    Volt::test('admin.users.index')
+        ->call('openEditModal', $target->id)
+        ->set('editingUserRole', RoleEnum::Avocat->value)
+        ->set('editingUserCabinetId', $suspendedCabinet->id)
+        ->call('updateUserAssignment')
+        ->assertHasErrors(['editingUserCabinetId']);
+});

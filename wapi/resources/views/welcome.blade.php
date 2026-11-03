@@ -34,13 +34,18 @@
                     </h1>
 
                     <p class="mt-6 max-w-2xl text-base leading-7 text-gray-300">
-                        {{ __('Wapi pose les bases securisees de la gestion multi-cabinet : authentification, invitations, roles, permissions et isolation stricte des donnees.') }}
+                        {{ __('Wapi pose les bases securisees de la gestion multi-cabinet : authentification, roles, permissions et isolation stricte des donnees.') }}
                     </p>
 
                     <div class="mt-8 flex flex-wrap gap-3">
                         <a href="{{ route('login') }}" class="rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-950 hover:bg-gray-100">
                             {{ __('Se connecter') }}
                         </a>
+                        @if (Route::has('register'))
+                            <a href="{{ route('register') }}" class="rounded-md border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20">
+                                {{ __('Créer un compte') }}
+                            </a>
+                        @endif
                     </div>
                 </section>
 
@@ -55,7 +60,7 @@
 
                         <div>
                             <dt class="font-medium text-white">{{ __('Utilisateurs') }}</dt>
-                            <dd class="mt-1 text-gray-300">{{ __('Invitation, activation, desactivation et attribution des roles Spatie.') }}</dd>
+                            <dd class="mt-1 text-gray-300">{{ __('Creation de compte, activation, desactivation et attribution des roles Spatie.') }}</dd>
                         </div>
 
                         <div>

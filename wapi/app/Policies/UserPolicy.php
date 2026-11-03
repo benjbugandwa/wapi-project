@@ -25,6 +25,11 @@ class UserPolicy
         return $user->isSystemAdmin();
     }
 
+    public function update(User $user, User $target): bool
+    {
+        return $user->isSystemAdmin();
+    }
+
     public function activate(User $user, User $target): bool
     {
         return $user->can(PermissionEnum::ActivateUsers->value)

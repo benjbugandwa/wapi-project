@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\DTO\CreateUserData;
+use App\DTO\EditUserAssignmentData;
 use App\DTO\UpdateProfileData;
 use App\DTO\UpdateUserRoleData;
 use App\Enums\RoleEnum;
@@ -62,6 +63,46 @@ class UserAccessService
             );
 
             return $user;
+        });
+    }
+
+    public function updateUserAssignment(EditUserAssignmentData $data, User $actor): User
+    {
+        Role::findByName($data->roleName);
+
+        if ($data->roleName === RoleEnum::SystemAdmin->value && ! $actor->isSystemAdmin()) {
+            throw ValidationException::withMessages([
+                'roleName' => __('Seul un administrateur systeme peut attribuer ce role.'),
+            ]);
+        }
+
+        return DB::transaction(function () use ($data, $actor): User {
+            $cabinetId = $data->roleName === RoleEnum::SystemAdmin->value ? null : $data->cabinetId;
+
+            $attributes = [
+                'cabinet_id' => $cabinetId,
+            ];
+
+            if ($data->isActive !== null) {
+                $attributes['is_active'] = $data->isActive;
+            }
+
+            $data->target->forceFill($attributes)->save();
+            $data->target->syncRoles([$data->roleName]);
+
+            $this->auditLogService->record(
+                action: 'user.assigned',
+                user: $actor,
+                cabinet: $data->target->cabinet,
+                auditable: $data->target,
+                metadata: [
+                    'role_name' => $data->roleName,
+                    'cabinet_id' => $cabinetId,
+                    'is_active' => $data->target->is_active,
+                ],
+            );
+
+            return $data->target->refresh();
         });
     }
 
