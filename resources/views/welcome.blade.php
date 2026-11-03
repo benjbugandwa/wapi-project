@@ -6,6 +6,11 @@
 
         <title>Wapi</title>
 
+        <!-- Favicon -->
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/logos/favicon-32x32.png') }}">
+        <link rel="icon" type="image/x-icon" href="{{ asset('images/logos/favicon-32x32.ico') }}">
+        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
+
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
 
